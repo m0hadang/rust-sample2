@@ -5,6 +5,12 @@ pub struct Node<T> {
     next: Option<Box<Node<T>>>//C 구조체 선언과 같다. 재귀적인 타입 정의이다. 값이 있으면 안되고 포인터가 있어야함
 }
 
+impl<T> Node<T> {
+    fn new(data: T, next: Option<Box<Node<T>>>) -> Self {
+        Self { data, next }
+    }
+}
+
 pub struct SimpleLinkedList<T> {
     head: Option<Box<Node<T>>>,
 }
@@ -39,11 +45,8 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn push(&mut self, _element: T) {
-        let new_item = Some(Box::new(Node {
-            data: _element,
-            next: self.head.take(),
-        }));
-        self.head = new_item;
+        let node = Box::new(Node::new(_element, self.head.take()));
+        self.head = Some(node);
     }
 
     pub fn pop(&mut self) -> Option<T> {
@@ -57,18 +60,13 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn peek(&self) -> Option<&T> {
-        match &self.head {
-            None => None,
-            Some(head_node) => {
-                Some(&head_node.data)
-            }
-        }
+        self.head.as_ref().map(|head| &(head.data))
     }
 
     pub fn rev(mut self) -> SimpleLinkedList<T> {
         let mut rev_list = SimpleLinkedList::new();
-        while !self.is_empty() {
-            rev_list.push(self.pop().unwrap());
+        while let Some(x) = self.pop() {
+            rev_list.push(x);
         }
         rev_list
     }
@@ -100,8 +98,8 @@ impl<T> FromIterator<T> for SimpleLinkedList<T> {
 impl<T> From<SimpleLinkedList<T>> for Vec<T> {
     fn from(mut _linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut vec = Vec::new();
-        while !_linked_list.is_empty() {
-            vec.insert(0, _linked_list.pop().unwrap());
+        while let Some(x) = _linked_list.pop() {
+            vec.insert(0, x);
         }
         vec
     }
